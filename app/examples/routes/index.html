@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Urban Tech Challenge</title>
+    <!-- Icons used for buttons. See https://fontawesome.com/search to find more-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link href="../style.css" rel="stylesheet" />
+  </head>
+  <body>
+    <!-- Map -->
+    <div id="cesiumContainer"></div>
+    <!-- Controls -->
+    <div class="controlsContainer">
+      <!-- Basic Controls -->
+      <button id="home-button" onclick="window.location.href='/index.html'">
+        <i class="fas fa-home"></i> Home
+      </button>
+      <button id="help-button"><i class="fa-brands fa-readme"></i> README</button>
+      <!-- Additional Controls -->
+      <button id="pickOrigin"><i class="fa-solid fa-location-pin"></i> Origin</button>
+      <button id="pickDestination"><i class="fa-solid fa-location-pin"></i> Destination</button>
+      <button id="reset">Reset</button>
+    </div>
+    <script type="module">
+      import { set_origin_destination, reset } from "./routes"
+      // *********** CONTROL HANDLING **********************
+      // Handle button clicks
+      document.getElementById("pickOrigin").addEventListener("click", async () => {
+        set_origin_destination(true)
+      })
+      document.getElementById("pickDestination").addEventListener("click", async () => {
+        set_origin_destination(false)
+      })
+      document.getElementById("reset").addEventListener("click", async () => {
+        reset()
+      })
+    </script>
+  </body>
+</html>

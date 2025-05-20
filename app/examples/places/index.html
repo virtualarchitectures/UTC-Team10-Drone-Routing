@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Urban Tech Challenge</title>
+    <!-- Icons used for buttons. See https://fontawesome.com/search to find more-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link href="../style.css" rel="stylesheet" />
+  </head>
+  <body>
+    <!-- Map -->
+    <div id="cesiumContainer"></div>
+    <!-- Controls -->
+    <div class="controlsContainer">
+      <!-- Basic Controls -->
+      <button id="home-button" onclick="window.location.href='/index.html'">
+        <i class="fas fa-home"></i> Home
+      </button>
+      <button id="help-button"><i class="fa-brands fa-readme"></i> README</button>
+      <!-- Additional Controls -->
+      <div class="search-box">
+        <input type="text" id="query-text" placeholder="Search..." />
+        <button type="submit" id="query-btn"><i class="fas fa-search"></i></button>
+      </div>
+      <div class="check-box">
+        <input type="checkbox" id="clip" name="clip" value="false" />
+        <label for="clip" id="clip-lbl"> Clip to Results?</label>
+      </div>
+    </div>
+    <script type="module">
+      import { searchPlaces, changeClipState } from "./places"
+
+      document.getElementById("query-text").value = "Restaraunts in Exton PA"
+
+      // *********** CONTROL HANDLING **********************
+      // Link 'enter' on the query text to the button click
+      document.querySelector("#query-text").addEventListener("keyup", () => {
+        if (event.key !== "Enter") return
+        document.querySelector("#query-btn").click()
+      })
+
+      document.querySelector("#query-btn").onclick = async function () {
+        let query = document.getElementById('query-text').value
+        searchPlaces(query)
+      }
+
+      document.getElementById("clip").addEventListener("change", () => {
+        changeClipState(event.currentTarget.checked)
+      })
+    </script>
+  </body>
+</html>

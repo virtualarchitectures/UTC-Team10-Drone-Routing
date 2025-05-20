@@ -1,0 +1,125 @@
+/* Basic styles for Cesium App*/
+html,
+body {
+  overflow: hidden;
+  margin: 0px;
+  padding: 0px;
+  height: 100%;
+}
+#cesiumContainer {
+  height: 100%;
+}
+
+/* Styles the controls buttons on the top left. */
+/* Buttons will be arranged in rows of 4, 
+    with all buttons sized to match whichever has the longest text. */
+.controlsContainer {
+  z-index: 1;
+  position: fixed;
+  top: 5px;
+  left: 10px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* Number of buttons per row */
+  gap: 10px;
+}
+button {
+  background-color: black; /* Black background */
+  color: white; /* White text */
+  border: 2px solid white; /* White border */
+  padding: 5px 10px; /* Adjust padding as needed */
+  font-size: 16px; /* Adjust font size as needed */
+  text-align: center; /* Center the text */
+  text-decoration: none; /* Remove underline */
+  display: inline-block; /* Inline-block display */
+  cursor: pointer; /* Pointer cursor on hover */
+}
+
+button:hover {
+  background-color: white; /* White background on hover */
+  color: black; /* Black text on hover */
+}
+
+label {
+  color: white; /* White text */
+  font-size: 16px; /* Adjust font size as needed */
+  text-align: center; /* Center the text */
+  padding: 5px 10px; /* Adjust padding as needed */
+}
+
+.labeled-box {
+  background-color: black; /* Black background */
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 2px;
+}
+
+.search-box {
+  background-color: black; /* Black background */
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 5px;
+}
+.search-box input[type="text"] {
+  border: none;
+  outline: none;
+  flex: 1;
+  padding: 5px;
+}
+.search-box button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+}
+.search-box button i {
+  font-size: 1.2em;
+}
+
+.check-box {
+  background-color: black; /* Black background */
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 2px;
+}
+
+
+
+/* Style for the Readme popup */
+.popup {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  max-width: 600px;
+  background: white;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+.popup-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+.popup-content {
+  max-height: 400px; /* Adjust the height as needed */
+  width: 560px;
+  overflow-y: auto;
+  display:inline-block;
+  word-break: break-word;
+  overflow-wrap: break-word; /* Ensure text wraps within the popup */
+  white-space: normal; /* Ensure text wraps within the popup */
+}
