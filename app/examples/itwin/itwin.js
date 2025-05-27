@@ -4,7 +4,7 @@ import { initReadMe } from "../readme.js"
 import readme from "./README.md"
 
 Cesium.ITwinPlatform.defaultShareKey =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpVHdpbklkIjoiNTM1YTI0YTMtOWIyOS00ZTIzLWJiNWQtOWNlZGI1MjRjNzQzIiwiaWQiOiIyZmQxYTE5Yi1jMDE5LTRlODMtODQwNi0xNTVkNGQ2OGExNzgiLCJleHAiOjE3NDc3NzQ1Mzh9.fKkJOnligDevLSKplD2JJJ_udSMyARTQ45aSYegjRB0"
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpVHdpbklkIjoiMDRiYTcyNWYtZjNjMC00ZjMwLTgwMTQtYTQ0ODhjYmQ2MTJkIiwiaWQiOiJkNzNhODQzMC1iZWNiLTQxMTQtYThjYy04NmIxZGMzNGYzMjUiLCJleHAiOjE3NzcwNTU3Njl9.ySsHT7VcVZDTPBhrnzqRIQMaLwjD6p3mPyGCHUI0awA"
 
 const { viewer } = await init3dGoogleViewer()
 initReadMe(readme)
