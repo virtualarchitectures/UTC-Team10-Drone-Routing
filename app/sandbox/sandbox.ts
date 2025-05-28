@@ -8,50 +8,11 @@ import flightData from "./formatted_routes/0_11_Mater_Misericordiae_to_Rotunda_H
 const { viewer } = await init3dGoogleViewer()
 
 const resource = await Cesium.IonResource.fromAssetId(3412943)
-const dataSource = await Cesium.GeoJsonDataSource.load(resource, {
+const airZones = await Cesium.GeoJsonDataSource.load(resource, {
   clampToGround: true,
   stroke: Cesium.Color.BLACK,
   strokeWidth: 2
 })
-
-dataSource.entities.values.forEach((entity) => {
-  if (entity.polygon) {
-    console.log(entity.properties)
-    const lowerlimit = entity.properties?.getValue()["lowerlimit"] as number
-    const upperlimit = entity.properties?.getValue()["upperlimit"] as number
-    console.log(entity.properties?.getValue())
-
-    if (lowerlimit === 0) {
-      entity.polygon.material = Cesium.Color.RED.withAlpha(0.4) as any
-    } else if (lowerlimit <= 30) {
-      entity.polygon.material = Cesium.Color.YELLOW.withAlpha(0.4) as any
-    } else {
-      entity.polygon.material = Cesium.Color.GREEN.withAlpha(0.4) as any
-    }
-
-    // entity.s
-
-    // entity.polygon.extrudedHeight = upperlimit as any
-    // entity.polygon.perPositionHeight = false as any
-    // entity.polygon.height = lowerlimit as any
-    // entity.polygon.heightReference = Cesium.HeightReference.RELATIVE_TO_GROUND as any
-    // entity.polygon.extrudedHeight = upperlimit as any
-    // entity.polygon.extrudedHeightReference = Cesium.HeightReference.RELATIVE_TO_GROUND as any
-  }
-})
-
-viewer.dataSources.add(dataSource)
-
-// for (let i = 0; i < flightData.length; i++) {
-//   const dataPoint = flightData[i]
-
-//   viewer.entities.add({
-//     description: `Location: (${dataPoint.longitude}, ${dataPoint.latitude}, ${dataPoint.height})`,
-//     position: Cesium.Cartesian3.fromDegrees(dataPoint.longitude, dataPoint.latitude, dataPoint.height),
-
-//     point: { pixelSize: 10, color: Cesium.Color.RED, heightReference: Cesium.HeightReference.RELATIVE_TO_3D_TILE }
-//   })
-// }
 
 // Search for nearby hospitals and schools in Dublin, Ireland
 const response = await searchNearby({
@@ -199,7 +160,7 @@ export const showRoute = async () => {
     const dataPoint = flightData[i]
     // Declare the time for this individual sample and store it in a new JulianDate instance.
     const time = Cesium.JulianDate.addSeconds(start, i * timeStepInSeconds, new Cesium.JulianDate())
-    const position = Cesium.Cartesian3.fromDegrees(dataPoint.longitude, dataPoint.latitude, dataPoint.height)
+    const position = Cesium.Cartesian3.fromDegrees(dataPoint.longitude, dataPoint.latitude, dataPoint.height + 30)
     // Store the position along with its timestamp.
     // Here we add the positions all upfront, but these can be added at run-time as samples are received from a server.
     positionProperty.addSample(time, position)
@@ -208,7 +169,7 @@ export const showRoute = async () => {
     viewer.entities.add({
       description: `Location: (${dataPoint.longitude}, ${dataPoint.latitude}, ${dataPoint.height})`,
       position: position,
-      point: { pixelSize: 10, color: Cesium.Color.RED, heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND }
+      point: { pixelSize: 10, color: Cesium.Color.RED, heightReference: Cesium.HeightReference.RELATIVE_TO_TERRAIN }
     })
   }
 
@@ -218,11 +179,37 @@ export const showRoute = async () => {
     availability: new Cesium.TimeIntervalCollection([new Cesium.TimeInterval({ start: start, stop: stop })]),
     position: positionProperty,
     // Attach the 3D model instead of the green point.
-    model: { uri: airplaneUri, heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND },
+    model: { uri: airplaneUri, heightReference: Cesium.HeightReference.RELATIVE_TO_TERRAIN },
     // Automatically compute the orientation from the position.
     orientation: new Cesium.VelocityOrientationProperty(positionProperty),
     path: new Cesium.PathGraphics({ width: 3 })
   })
 
   viewer.trackedEntity = airplaneEntity
+}
+
+export const showAirZones = () => {
+  airZones.entities.values.forEach((entity) => {
+    if (entity.polygon) {
+      const lowerlimit = entity.properties?.getValue()["lowerlimit"] as number
+      const upperlimit = entity.properties?.getValue()["upperlimit"] as number
+
+      if (lowerlimit === 0) {
+        entity.polygon.material = Cesium.Color.RED.withAlpha(0.8) as any
+      } else if (lowerlimit <= 30) {
+        entity.polygon.material = Cesium.Color.YELLOW.withAlpha(0.8) as any
+      } else {
+        entity.polygon.material = Cesium.Color.GREEN.withAlpha(0.8) as any
+      }
+
+      entity.polygon.extrudedHeight = upperlimit as any
+      entity.polygon.perPositionHeight = false as any
+      entity.polygon.height = lowerlimit as any
+      entity.polygon.heightReference = Cesium.HeightReference.RELATIVE_TO_TERRAIN as any
+      entity.polygon.extrudedHeight = upperlimit as any
+      entity.polygon.extrudedHeightReference = Cesium.HeightReference.RELATIVE_TO_TERRAIN as any
+    }
+  })
+
+  viewer.dataSources.add(airZones)
 }

@@ -15,7 +15,7 @@ export const init3dGoogleViewer = async () => {
   const viewer = new Cesium.Viewer("cesiumContainer", {
     // The globe does not need to be displayed,
     // since the Photorealistic 3D Tiles include terrain
-    globe: false,
+    // globe: true,
     // can turn timeline and animation back on if dealing with time-dependent data
     timeline: true,
     animation: false,
@@ -26,6 +26,8 @@ export const init3dGoogleViewer = async () => {
     // geocoder must be Google for photorealistic tiles
     geocoder: Cesium.IonGeocodeProviderType.GOOGLE
   })
+
+  viewer.scene.setTerrain(new Cesium.Terrain(Cesium.CesiumTerrainProvider.fromIonAssetId(1)))
 
   const tileset = await Cesium.createGooglePhotorealistic3DTileset({
     // Only the Google Geocoder can be used with Google Photorealistic 3D Tiles.
@@ -41,8 +43,8 @@ export const init3dGoogleViewer = async () => {
   }
 
   return {
-    viewer,
-    tileset
+    viewer
+    // tileset
   }
 }
 
