@@ -2,6 +2,7 @@ import * as Cesium from "cesium"
 import { init3dGoogleViewer } from "../cesium-init"
 import { searchNearby } from "../api/placesapi"
 import flightData from "./formatted_routes/0_11_Mater_Misericordiae_to_Rotunda_Hospital.json"
+import { computeRoutes, ComputeRoutesResponse } from "../api/routesapi"
 
 // *********** VIEWER **********************
 // Option of 2d or 3d tileset
@@ -117,15 +118,6 @@ async function displayResults(places) {
       })
     })
   })
-
-  // viewer.camera.setView({
-  //   destination: Cesium.Rectangle.fromCartesianArray([
-  //     Cesium.Cartesian3.fromDegrees(-6.2757440952928505, 53.35566508381177),
-  //     Cesium.Cartesian3.fromDegrees(-6.2757440952928505, 53.34217624248879),
-  //     Cesium.Cartesian3.fromDegrees(-6.246062078659605, 53.34217624248879),
-  //     Cesium.Cartesian3.fromDegrees(-6.246062078659605, 53.35566508381177)
-  //   ])
-  // })
 }
 
 // *********** FUNCTIONS FOR UI **********************
@@ -169,7 +161,7 @@ export const showRoute = async () => {
     viewer.entities.add({
       description: `Location: (${dataPoint.longitude}, ${dataPoint.latitude}, ${dataPoint.height})`,
       position: position,
-      point: { pixelSize: 10, color: Cesium.Color.RED, heightReference: Cesium.HeightReference.RELATIVE_TO_TERRAIN }
+      point: { pixelSize: 10, color: Cesium.Color.BLUE, heightReference: Cesium.HeightReference.RELATIVE_TO_TERRAIN }
     })
   }
 
@@ -186,30 +178,124 @@ export const showRoute = async () => {
   })
 
   viewer.trackedEntity = airplaneEntity
+
+  const origin = flightData[0]
+
+  const roadRoute = await computeRoutes(
+    { longitude: origin.longitude, latitude: origin.latitude },
+    {
+      longitude: flightData[flightData.length - 1].longitude,
+      latitude: flightData[flightData.length - 1].latitude
+    }
+  )
+
+  showRoadRoute(roadRoute)
 }
 
 export const showAirZones = () => {
-  airZones.entities.values.forEach((entity) => {
-    if (entity.polygon) {
-      const lowerlimit = entity.properties?.getValue()["lowerlimit"] as number
-      const upperlimit = entity.properties?.getValue()["upperlimit"] as number
+  if (viewer.dataSources.contains(airZones)) {
+    viewer.dataSources.remove(airZones, false)
+  } else {
+    airZones.entities.values.forEach((entity) => {
+      if (entity.polygon) {
+        const lowerlimit = entity.properties?.getValue()["lowerlimit"] as number
+        const upperlimit = entity.properties?.getValue()["upperlimit"] as number
 
-      if (lowerlimit === 0) {
-        entity.polygon.material = Cesium.Color.RED.withAlpha(0.8) as any
-      } else if (lowerlimit <= 30) {
-        entity.polygon.material = Cesium.Color.YELLOW.withAlpha(0.8) as any
-      } else {
-        entity.polygon.material = Cesium.Color.GREEN.withAlpha(0.8) as any
+        if (lowerlimit === 0) {
+          entity.polygon.material = Cesium.Color.RED.withAlpha(0.5) as any
+        } else if (lowerlimit <= 30) {
+          entity.polygon.material = Cesium.Color.YELLOW.withAlpha(0.5) as any
+        } else {
+          entity.polygon.material = Cesium.Color.GREEN.withAlpha(0.5) as any
+        }
+
+        entity.polygon.extrudedHeight = upperlimit as any
+        entity.polygon.perPositionHeight = false as any
+        entity.polygon.height = lowerlimit as any
+        entity.polygon.heightReference = Cesium.HeightReference.RELATIVE_TO_TERRAIN as any
+        entity.polygon.extrudedHeight = upperlimit as any
+        entity.polygon.extrudedHeightReference = Cesium.HeightReference.RELATIVE_TO_TERRAIN as any
       }
+    })
 
-      entity.polygon.extrudedHeight = upperlimit as any
-      entity.polygon.perPositionHeight = false as any
-      entity.polygon.height = lowerlimit as any
-      entity.polygon.heightReference = Cesium.HeightReference.RELATIVE_TO_TERRAIN as any
-      entity.polygon.extrudedHeight = upperlimit as any
-      entity.polygon.extrudedHeightReference = Cesium.HeightReference.RELATIVE_TO_TERRAIN as any
-    }
+    viewer.dataSources.add(airZones)
+  }
+}
+
+const showRoadRoute = (roadRoute: ComputeRoutesResponse) => {
+  drawRoutes(roadRoute.routes)
+
+  // Show a vehicle along the road route?
+
+  // The SampledPositionedProperty stores the position and timestamp for each sample along the radar sample series.
+  // const positionProperty = new Cesium.SampledPositionProperty()
+
+  // for (let i = 0; i < roadRoute.routes[0].polyline.length; i++) {
+  //   const dataPoint = flightData[i]
+  //   // Declare the time for this individual sample and store it in a new JulianDate instance.
+  //   const time = Cesium.JulianDate.addSeconds(start, i * timeStepInSeconds, new Cesium.JulianDate())
+  //   const position = Cesium.Cartesian3.fromDegrees(dataPoint.longitude, dataPoint.latitude, dataPoint.height + 30)
+  //   // Store the position along with its timestamp.
+  //   // Here we add the positions all upfront, but these can be added at run-time as samples are received from a server.
+  //   positionProperty.addSample(time, position)
+
+  //   // Show the sample points on the map
+  //   viewer.entities.add({
+  //     description: `Location: (${dataPoint.longitude}, ${dataPoint.latitude}, ${dataPoint.height})`,
+  //     position: position,
+  //     point: { pixelSize: 10, color: Cesium.Color.RED, heightReference: Cesium.HeightReference.RELATIVE_TO_TERRAIN }
+  //   })
+  // }
+
+  // Add drone resource
+  // const airplaneUri = await Cesium.IonResource.fromAssetId(3414234)
+  // const airplaneEntity = viewer.entities.add({
+  //   availability: new Cesium.TimeIntervalCollection([new Cesium.TimeInterval({ start: start, stop: stop })]),
+  //   position: positionProperty,
+  //   // Attach the 3D model instead of the green point.
+  //   model: { uri: airplaneUri, heightReference: Cesium.HeightReference.RELATIVE_TO_TERRAIN },
+  //   // Automatically compute the orientation from the position.
+  //   orientation: new Cesium.VelocityOrientationProperty(positionProperty),
+  //   path: new Cesium.PathGraphics({ width: 3 })
+  // })
+}
+
+const routePolylines: Cesium.Entity[] = []
+
+function drawRoutes(routes: ComputeRoutesResponse["routes"]) {
+  // Remove old routes
+  routePolylines.forEach(function (element) {
+    viewer.entities.remove(element)
   })
 
-  viewer.dataSources.add(airZones)
+  routes.forEach(function (route) {
+    const coordinates = route.polyline.geoJsonLinestring["coordinates"].flat()
+    console.log(`Drawing polyline with ${coordinates.length} points`)
+    const length_km = route["distanceMeters"] / 1000
+    const duration_hr = parseInt(route["duration"].slice(0, -1)) / 3600
+    const avg_speed_kmh = length_km / duration_hr
+    const fuelConsumption_liters = route["travelAdvisory"]["fuelConsumptionMicroliters"] / 1000000
+
+    const label = route["routeLabels"].join(" & ")
+
+    const warnings = route["warnings"]?.join(" ") || ""
+
+    const routePolyline = viewer.entities.add({
+      name: label,
+      description: `
+            Length (km): ${length_km.toFixed(2)}<br>
+            Duration (hours): ${duration_hr.toFixed(2)}<br>
+            Average Speed (kph): ${avg_speed_kmh.toFixed(2)}<br>
+            Fuel Consumption for Gasoline Vehicle (liters): ${fuelConsumption_liters.toFixed(2)}<br>
+            Warnings: ${warnings}<br>
+          `,
+      polyline: {
+        positions: Cesium.Cartesian3.fromDegreesArray(coordinates),
+        material: Cesium.Color.RED.withAlpha(0.6),
+        width: 5,
+        clampToGround: true
+      }
+    })
+    routePolylines.push(routePolyline)
+  })
 }
