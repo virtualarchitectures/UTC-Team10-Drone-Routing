@@ -17,15 +17,18 @@
       <button id="home-button" onclick="window.location.href='/index.html'"><i class="fas fa-home"></i> Home</button>
       <button id="help-button"><i class="fa-brands fa-readme"></i> README</button>
       <!-- Additional Controls - Add as needed -->
-      <button id="custom-button">Custom Button</button>
+      <button id="show-route-button">Show Route</button>
+    </div>
+    <div class="route-panel">
+        <div>Route - Mater Misericordiae to Rotunda Hospital</div>
     </div>
     <script type="module">
-      import { doSomething } from "./sandbox"
+      import { showRoute } from "./sandbox"
       // *********** CONTROL HANDLING **********************
       // Handle button clicks
       // Add button click handlers for any custom controls
-      document.getElementById("custom-button").addEventListener("click", async () => {
-        doSomething()
+      document.getElementById("show-route-button").addEventListener("click", async () => {
+        showRoute()
       })
     </script>
   </body>

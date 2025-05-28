@@ -17,7 +17,7 @@ export const init3dGoogleViewer = async () => {
     // since the Photorealistic 3D Tiles include terrain
     globe: false,
     // can turn timeline and animation back on if dealing with time-dependent data
-    timeline: false,
+    timeline: true,
     animation: false,
     // baseLayerPicker must be false to comply with Google API terms of service
     baseLayerPicker: false,

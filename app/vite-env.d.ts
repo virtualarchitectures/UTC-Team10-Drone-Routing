@@ -9,3 +9,4 @@ interface ImportMeta {
 }
 
 declare module "*.md";
+declare module "*.geojson" {

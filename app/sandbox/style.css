@@ -123,3 +123,12 @@ label {
   overflow-wrap: break-word; /* Ensure text wraps within the popup */
   white-space: normal; /* Ensure text wraps within the popup */
 }
+
+.route-panel {
+  z-index: 1;
+  position: fixed;
+  top: 50px;
+  left: 10px;
+  background-color: white;
+  border-radius: 5px;
+  padding: 10px;}

@@ -7,7 +7,6 @@ const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
  * @see https://developers.google.com/maps/documentation/places/web-service/reference/rest
  */
 
-
 export interface SearchTextRequest {
   textQuery: string
   maxResultCount: number
@@ -22,6 +21,7 @@ export interface Place {
     latitude: number
   }
   formattedAddress: string
+  primaryType: string
   primaryTypeDisplayName: {
     text: string
   }
@@ -41,6 +41,42 @@ export interface SearchTextResponse {
 export const searchText = async (request: SearchTextRequest) => {
   return await axios
     .post("https://places.googleapis.com/v1/places:searchText", request, {
+      headers: {
+        "Content-Type": "application/json",
+        "X-Goog-Api-Key": GOOGLE_MAPS_API_KEY,
+        "X-Goog-FieldMask": "places" // restrict returned fields to only those needed
+      }
+    })
+    .then((response) => {
+      console.log(response.data)
+      return response.data as SearchTextResponse
+    })
+}
+
+export interface SearchNearbyRequest {
+  regionCode: string
+  includedTypes: string[]
+  locationRestriction: {
+    circle: {
+      center: {
+        longitude: number
+        latitude: number
+      }
+      radius: number
+    }
+  }
+}
+
+export interface SearchNearbyResponse {
+  places: Place[]
+}
+/**
+ *
+ * POST https://places.googleapis.com/v1/places:searchNearby
+ */
+export const searchNearby = async (request: SearchNearbyRequest) => {
+  return await axios
+    .post("https://places.googleapis.com/v1/places:searchNearby", request, {
       headers: {
         "Content-Type": "application/json",
         "X-Goog-Api-Key": GOOGLE_MAPS_API_KEY,
