@@ -21,8 +21,20 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, "index.html"),
-        flood: resolve(__dirname, "./app/examples/flood/index.html")
+        flood: resolve(__dirname, "./app/sandbox/index.html")
       }
+    }
+  },
+  optimizeDeps: {
+    esbuildOptions: {
+      supported: {
+        "top-level-await": true
+      }
+    }
+  },
+  esbuild: {
+    supported: {
+      "top-level-await": true
     }
   }
 })
