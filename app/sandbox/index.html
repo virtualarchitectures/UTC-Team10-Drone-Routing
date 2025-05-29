@@ -15,13 +15,13 @@
     <div class="controlsContainer">
       <!-- Basic Controls -->
       <button id="home-button" onclick="window.location.href='/index.html'"><i class="fas fa-home"></i> Home</button>
-      <button id="help-button"><i class="fa-brands fa-readme"></i> README</button>
       <!-- Additional Controls - Add as needed -->
       <button id="show-route-button">Show Route</button>
       <button id="show-air-zone-button">Show Air Restrictions</button>
     </div>
     <div class="route-panel">
-        <div>Route - Mater Misericordiae to Rotunda Hospital</div>
+        <div>Route: <b>Rotunda Hospital</b> to <b>St James's Hospital</b></div>
+        <div id="distance-val"></div>
     </div>
     <script type="module">
       import { showRoute, showAirZones } from "./sandbox"

@@ -1,7 +1,8 @@
 import * as Cesium from "cesium"
 import { init3dGoogleViewer } from "../cesium-init"
 import { searchNearby } from "../api/placesapi"
-import flightData from "./formatted_routes/0_11_Mater_Misericordiae_to_Rotunda_Hospital.json"
+import flightData from "./formatted_routes/over_water.json"
+// import flightData from "./formatted_routes/over_water_direct.json"
 import { computeRoutes, ComputeRoutesResponse } from "../api/routesapi"
 
 // *********** VIEWER **********************
@@ -30,54 +31,54 @@ const response = await searchNearby({
   }
 })
 
-const hospitals = response.places.filter((place) => place.primaryType === "hospital")
+// const hospitals = response.places.filter((place) => place.primaryType === "hospital")
 
 // Handle the drawning of routes on entity selection
-let lines: Cesium.Entity[] = []
-viewer.selectedEntityChanged.addEventListener((entity: Cesium.Entity) => {
-  if (hospitals.filter((place) => place.displayName.text === entity.name).length > 0) {
-    // Display a zone around the selected hospital
+// let lines: Cesium.Entity[] = []
+// viewer.selectedEntityChanged.addEventListener((entity: Cesium.Entity) => {
+//   if (hospitals.filter((place) => place.displayName.text === entity.name).length > 0) {
+//     // Display a zone around the selected hospital
 
-    // Draw a line to hospitals in range
-    const selectedHospitalPosition = entity.position?.getValue()
-    if (selectedHospitalPosition) {
-      const hosInRange = hospitals.filter((hospital) => {
-        // Not completely accurate, as it would go directly through the Earth, but good enough for this example.
-        return (
-          Cesium.Cartesian3.distance(
-            selectedHospitalPosition,
-            Cesium.Cartesian3.fromDegrees(hospital.location.longitude, hospital.location.latitude)
-          ) < 2000
-        ) // 2km range
-      })
+//     // Draw a line to hospitals in range
+//     const selectedHospitalPosition = entity.position?.getValue()
+//     if (selectedHospitalPosition) {
+//       const hosInRange = hospitals.filter((hospital) => {
+//         // Not completely accurate, as it would go directly through the Earth, but good enough for this example.
+//         return (
+//           Cesium.Cartesian3.distance(
+//             selectedHospitalPosition,
+//             Cesium.Cartesian3.fromDegrees(hospital.location.longitude, hospital.location.latitude)
+//           ) < 2000
+//         ) // 2km range
+//       })
 
-      // Clear previous lines
-      lines.forEach((line) => {
-        viewer.entities.remove(line)
-      })
+//       // Clear previous lines
+//       lines.forEach((line) => {
+//         viewer.entities.remove(line)
+//       })
 
-      console.log(selectedHospitalPosition)
+//       console.log(selectedHospitalPosition)
 
-      lines = hosInRange.map((hospital) => {
-        const linePoints = [
-          selectedHospitalPosition.clone(),
-          Cesium.Cartesian3.fromDegrees(hospital.location.longitude, hospital.location.latitude)
-        ].map((point) => {
-          return viewer.scene.clampToHeight(point)
-        })
+//       lines = hosInRange.map((hospital) => {
+//         const linePoints = [
+//           selectedHospitalPosition.clone(),
+//           Cesium.Cartesian3.fromDegrees(hospital.location.longitude, hospital.location.latitude)
+//         ].map((point) => {
+//           return viewer.scene.clampToHeight(point)
+//         })
 
-        const line = new Cesium.Entity({
-          polyline: {
-            positions: linePoints,
-            width: 2
-          }
-        })
-        viewer.entities.add(line)
-        return line
-      })
-    }
-  }
-})
+//         const line = new Cesium.Entity({
+//           polyline: {
+//             positions: linePoints,
+//             width: 2
+//           }
+//         })
+//         viewer.entities.add(line)
+//         return line
+//       })
+//     }
+//   }
+// })
 
 if (response.places) {
   displayResults(response.places)
@@ -140,7 +141,7 @@ export const showRoute = async () => {
 
   viewer.timeline.zoomTo(start, stop)
   // Speed up the playback speed 50x.
-  viewer.clock.multiplier = 5
+  viewer.clock.multiplier = 10
   viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP
   // Start playing the scene.
   viewer.clock.shouldAnimate = true
@@ -171,21 +172,61 @@ export const showRoute = async () => {
     availability: new Cesium.TimeIntervalCollection([new Cesium.TimeInterval({ start: start, stop: stop })]),
     position: positionProperty,
     // Attach the 3D model instead of the green point.
-    model: { uri: airplaneUri, heightReference: Cesium.HeightReference.RELATIVE_TO_TERRAIN },
+    model: {
+      uri: airplaneUri,
+      heightReference: Cesium.HeightReference.RELATIVE_TO_TERRAIN,
+      scale: 15,
+      color: Cesium.Color.BLUE,
+      colorBlendMode: Cesium.ColorBlendMode.MIX
+    },
     // Automatically compute the orientation from the position.
-    orientation: new Cesium.VelocityOrientationProperty(positionProperty),
-    path: new Cesium.PathGraphics({ width: 3 })
+    orientation: new Cesium.VelocityOrientationProperty(positionProperty)
+    // path: new Cesium.PathGraphics({ width: 3, material: Cesium.Color.BLUE })
   })
 
   viewer.trackedEntity = airplaneEntity
 
   const origin = flightData[0]
+  const destination = flightData[flightData.length - 1]
+
+  const distance = flightData.reduce((prev, curr, indx) => {
+    if (indx === 0) {
+      // Skip the first iteration
+      return prev
+    }
+
+    const prevPoint = flightData[indx - 1]
+    const currPoint = curr
+
+    const distance = new Cesium.EllipsoidGeodesic(
+      Cesium.Cartographic.fromDegrees(prevPoint.longitude, prevPoint.latitude),
+      Cesium.Cartographic.fromDegrees(currPoint.longitude, currPoint.latitude)
+    ).surfaceDistance
+
+    return prev + distance
+  }, 0)
+
+  // const distance = new Cesium.EllipsoidGeodesic(
+  //   Cesium.Cartographic.fromDegrees(origin.longitude, origin.latitude),
+  //   Cesium.Cartographic.fromDegrees(destination.longitude, destination.latitude)
+  // )
+
+  const distanceElement = document.getElementById("distance-val")
+
+  const distanceInKm = distance / 1000
+
+  if (distanceElement) {
+    distanceElement.textContent = `Distance: ${distanceInKm.toFixed(2)} km Duration:  ${(
+      (distanceInKm / 50) *
+      60
+    ).toFixed(2)} mins`
+  }
 
   const roadRoute = await computeRoutes(
     { longitude: origin.longitude, latitude: origin.latitude },
     {
-      longitude: flightData[flightData.length - 1].longitude,
-      latitude: flightData[flightData.length - 1].latitude
+      longitude: destination.longitude,
+      latitude: destination.latitude
     }
   )
 
@@ -209,6 +250,7 @@ export const showAirZones = () => {
           entity.polygon.material = Cesium.Color.GREEN.withAlpha(0.5) as any
         }
 
+        // Adds height and extruded height to the air zone polygons
         entity.polygon.extrudedHeight = upperlimit as any
         entity.polygon.perPositionHeight = false as any
         entity.polygon.height = lowerlimit as any
@@ -224,40 +266,6 @@ export const showAirZones = () => {
 
 const showRoadRoute = (roadRoute: ComputeRoutesResponse) => {
   drawRoutes(roadRoute.routes)
-
-  // Show a vehicle along the road route?
-
-  // The SampledPositionedProperty stores the position and timestamp for each sample along the radar sample series.
-  // const positionProperty = new Cesium.SampledPositionProperty()
-
-  // for (let i = 0; i < roadRoute.routes[0].polyline.length; i++) {
-  //   const dataPoint = flightData[i]
-  //   // Declare the time for this individual sample and store it in a new JulianDate instance.
-  //   const time = Cesium.JulianDate.addSeconds(start, i * timeStepInSeconds, new Cesium.JulianDate())
-  //   const position = Cesium.Cartesian3.fromDegrees(dataPoint.longitude, dataPoint.latitude, dataPoint.height + 30)
-  //   // Store the position along with its timestamp.
-  //   // Here we add the positions all upfront, but these can be added at run-time as samples are received from a server.
-  //   positionProperty.addSample(time, position)
-
-  //   // Show the sample points on the map
-  //   viewer.entities.add({
-  //     description: `Location: (${dataPoint.longitude}, ${dataPoint.latitude}, ${dataPoint.height})`,
-  //     position: position,
-  //     point: { pixelSize: 10, color: Cesium.Color.RED, heightReference: Cesium.HeightReference.RELATIVE_TO_TERRAIN }
-  //   })
-  // }
-
-  // Add drone resource
-  // const airplaneUri = await Cesium.IonResource.fromAssetId(3414234)
-  // const airplaneEntity = viewer.entities.add({
-  //   availability: new Cesium.TimeIntervalCollection([new Cesium.TimeInterval({ start: start, stop: stop })]),
-  //   position: positionProperty,
-  //   // Attach the 3D model instead of the green point.
-  //   model: { uri: airplaneUri, heightReference: Cesium.HeightReference.RELATIVE_TO_TERRAIN },
-  //   // Automatically compute the orientation from the position.
-  //   orientation: new Cesium.VelocityOrientationProperty(positionProperty),
-  //   path: new Cesium.PathGraphics({ width: 3 })
-  // })
 }
 
 const routePolylines: Cesium.Entity[] = []
@@ -284,7 +292,7 @@ function drawRoutes(routes: ComputeRoutesResponse["routes"]) {
       name: label,
       description: `
             Length (km): ${length_km.toFixed(2)}<br>
-            Duration (hours): ${duration_hr.toFixed(2)}<br>
+            Duration (mins): ${(duration_hr * 60).toFixed(2)}<br>
             Average Speed (kph): ${avg_speed_kmh.toFixed(2)}<br>
             Fuel Consumption for Gasoline Vehicle (liters): ${fuelConsumption_liters.toFixed(2)}<br>
             Warnings: ${warnings}<br>
