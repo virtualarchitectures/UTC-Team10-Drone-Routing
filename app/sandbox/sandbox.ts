@@ -80,45 +80,57 @@ const response = await searchNearby({
 //   }
 // })
 
-if (response.places) {
-  displayResults(response.places)
-}
+let hospitalPins: Cesium.Entity[] = [];
 
 async function displayResults(places) {
-  // Use the places to draw several entities on the map.
   if (!places.length) {
     console.log("No results")
     return
   }
 
-  // DRAW PINS
   const pinBuilder = new Cesium.PinBuilder()
 
-  // Loop through and get all the results.
-  places.map(async (place) => {
+  // Store all pin promises
+  const pinPromises = places.map(async (place) => {
     const lat = place.location?.latitude
     const long = place.location?.longitude
 
-    return Promise.resolve(
-      pinBuilder.fromUrl(place.iconMaskBaseUri + ".svg", Cesium.Color.fromCssColorString(place.iconBackgroundColor), 48)
-    ).then((image) => {
-      // Note: the ? allows the  property to be missing for a particular place, and simply returns a blank string.
-      return viewer.entities.add({
-        name: place.displayName.text,
-        description: `${place.formattedAddress}<br>
-          Rating: ${place.rating}<br>
-          ${place.primaryTypeDisplayName?.text ?? ""} 
-        `,
-        position: Cesium.Cartesian3.fromDegrees(long, lat),
-        billboard: {
-          //image: pinBuilder.fromText(place['rating'], Cesium.Color.BLUE, 48).toDataURL(),
-          image,
-          verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-          heightReference: Cesium.HeightReference.CLAMP_TO_GROUND
-        }
-      })
+    const image = await pinBuilder.fromUrl(
+      place.iconMaskBaseUri + ".svg", 
+      Cesium.Color.fromCssColorString(place.iconBackgroundColor), 
+      48
+    )
+    
+    const pin = viewer.entities.add({
+      name: place.displayName.text,
+      description: `${place.formattedAddress}<br>
+        Rating: ${place.rating}<br>
+        ${place.primaryTypeDisplayName?.text ?? ""} 
+      `,
+      position: Cesium.Cartesian3.fromDegrees(long, lat),
+      billboard: {
+        image,
+        verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND
+      },
+      show: false  // Set initial visibility to false
     })
+    
+    return pin;
   })
+
+  hospitalPins = await Promise.all(pinPromises);
+}
+
+if (response.places) {
+  displayResults(response.places)
+}
+
+// Add new toggle function
+export const toggleHospitals = () => {
+  hospitalPins.forEach(pin => {
+    pin.show = !pin.show;
+  });
 }
 
 // *********** FUNCTIONS FOR UI **********************
@@ -307,3 +319,4 @@ function drawRoutes(routes: ComputeRoutesResponse["routes"]) {
     routePolylines.push(routePolyline)
   })
 }
+
