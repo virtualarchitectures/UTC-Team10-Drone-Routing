@@ -2,8 +2,8 @@ import * as Cesium from "cesium"
 import { init3dGoogleViewer } from "../cesium-init"
 import { searchNearby } from "../api/placesapi"
 
-import flightData from "./formatted_routes/over_water.json"
-import flightDataDirect from "./formatted_routes/over_water_direct.json"
+import directFlightData from "./formatted_routes/over_water_direct.json"
+import overWaterFlightData from "./formatted_routes/over_water.json"
 
 import { computeRoutes, ComputeRoutesResponse } from "../api/routesapi"
 
@@ -146,11 +146,24 @@ export const toggleHospitals = () => {
 }
 
 // *********** FUNCTIONS FOR UI **********************
-let currentFlightData = flightData;
+let currentFlightData = directFlightData;
 
-export const toggleFlightData = () => {
-  currentFlightData = currentFlightData === flightData ? flightDataDirect : flightData;
-  console.log(`Switched to ${currentFlightData === flightData ? "over water" : "over water direct"} route`);
+function clearFlightVisualization() {
+  viewer.entities.removeAll(); // Remove all entities including flight paths
+  viewer.dataSources.removeAll(); // Clear data sources if needed
+  // Reset other visual states or elements if necessary
+}
+
+export const switchFlightData = (type: string) => {
+  // Switch the flight data
+  currentFlightData = type === "direct" ? directFlightData : overWaterFlightData;
+  console.log(`Switched to ${type === "direct" ? "Direct" : "Over Water"} flight path`);
+
+  // Clear existing flight visualization
+  clearFlightVisualization();
+
+  // Re-display the route with the new data
+  showRoute();
 }
 
 export const showRoute = async () => {
@@ -163,7 +176,7 @@ export const showRoute = async () => {
   Also, set the viewer's current time to the start time and take the user to that time. 
 */
   const timeStepInSeconds = 30
-  const totalSeconds = timeStepInSeconds * (flightData.length - 1)
+  const totalSeconds = timeStepInSeconds * (currentFlightData.length - 1)
   const start = Cesium.JulianDate.fromIso8601("2020-03-09T23:10:00Z")
   const stop = Cesium.JulianDate.addSeconds(start, totalSeconds, new Cesium.JulianDate())
   viewer.clock.startTime = start.clone()
@@ -221,13 +234,13 @@ export const showRoute = async () => {
   const destination = currentFlightData[currentFlightData.length - 1];
 
 
-  const distance = flightData.reduce((prev, curr, indx) => {
+  const distance = currentFlightData.reduce((prev, curr, indx) => {
     if (indx === 0) {
       // Skip the first iteration
       return prev
     }
 
-    const prevPoint = flightData[indx - 1]
+    const prevPoint = currentFlightData[indx - 1]
     const currPoint = curr
 
     const distance = new Cesium.EllipsoidGeodesic(

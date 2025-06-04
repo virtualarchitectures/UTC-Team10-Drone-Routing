@@ -22,7 +22,8 @@ body {
   grid-template-columns: repeat(5, 1fr); /* Number of buttons per row */
   gap: 10px;
 }
-button {
+button,
+select {
   background-color: black; /* Black background */
   color: white; /* White text */
   border: 2px solid white; /* White border */
@@ -33,8 +34,8 @@ button {
   display: inline-block; /* Inline-block display */
   cursor: pointer; /* Pointer cursor on hover */
 }
-
-button:hover {
+button:hover,
+select:hover {
   background-color: white; /* White background on hover */
   color: black; /* Black text on hover */
 }
@@ -88,8 +89,6 @@ label {
   padding: 2px;
 }
 
-
-
 /* Style for the Readme popup */
 .popup {
   display: none;
@@ -131,4 +130,5 @@ label {
   left: 10px;
   background-color: white;
   border-radius: 5px;
-  padding: 10px;}
+  padding: 10px;
+}

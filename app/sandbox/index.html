@@ -16,17 +16,20 @@
       <!-- Basic Controls -->
       <button id="home-button" onclick="window.location.href='/index.html'"><i class="fas fa-home"></i> Home</button>
       <!-- Additional Controls - Add as needed -->
-      <button id="show-route-button">Drone Routes</button>
       <button id="show-hospitals-button">Hospitals</button>
       <button id="show-air-zone-button">UAS Air Restrictions</button>
-      <button id="toggle-flight-data-button">Flight Data</button>
+      <button id="show-route-button">Drone Route</button>
+      <select id="flight-data-select" class="button">
+        <option value="direct">Direct</option>
+        <option value="overWater">Over Water</option>
+      </select>
     </div>
     <div class="route-panel">
         <div>Route: <b>Rotunda Hospital</b> to <b>St James's Hospital</b></div>
         <div id="distance-val"></div>
     </div>
     <script type="module">
-      import { showRoute, showAirZones, toggleHospitals, toggleFlightData } from "./sandbox"
+      import { showRoute, showAirZones, toggleHospitals, switchFlightData } from "./sandbox"
       // *********** CONTROL HANDLING **********************/
       // Handle button clicks
       // Add button click handlers for any custom controls
@@ -39,8 +42,14 @@
       document.getElementById("show-route-button").addEventListener("click", async () => {
         showRoute()
       })
-      document.getElementById("toggle-flight-data-button").addEventListener("click", () => {
-        toggleFlightData();
+      // Added a new event listener for the select element
+      document.getElementById("flight-data-select").addEventListener("change", (event) => {
+        const selectedValue = event.target.value;
+        if (selectedValue === "direct") {
+          switchFlightData("direct");
+        } else {
+          switchFlightData("overWater");
+        }
       });
     </script>
   </body>
