@@ -149,13 +149,18 @@ export const toggleHospitals = () => {
 let currentFlightData = directFlightData;
 
 function clearFlightVisualization() {
-  viewer.entities.removeAll(); // Remove all entities including flight paths and pins
-  viewer.dataSources.removeAll(); // Clear data sources if needed
+  // Remove flight path entities only
+  const flightPathEntities = viewer.entities.values.filter(entity =>
+    entity.model || entity.point || entity.polyline
+  );
 
-  // Reset any additional state variables if necessary
+  flightPathEntities.forEach(entity => {
+    viewer.entities.remove(entity);
+  });
+
+  // Ensure air zones and map pins remain unaffected
   isRouteDisplayed = false;
 }
-
 export const switchFlightData = (type: string) => {
   // Switch the flight data
   currentFlightData = type === "direct" ? directFlightData : overWaterFlightData;
