@@ -19,14 +19,15 @@
       <button id="show-route-button">Drone Routes</button>
       <button id="show-hospitals-button">Hospitals</button>
       <button id="show-air-zone-button">UAS Air Restrictions</button>
+      <button id="toggle-flight-data-button">Flight Data</button>
     </div>
     <div class="route-panel">
         <div>Route: <b>Rotunda Hospital</b> to <b>St James's Hospital</b></div>
         <div id="distance-val"></div>
     </div>
     <script type="module">
-      import { showRoute, showAirZones, toggleHospitals } from "./sandbox"
-      // *********** CONTROL HANDLING **********************
+      import { showRoute, showAirZones, toggleHospitals, toggleFlightData } from "./sandbox"
+      // *********** CONTROL HANDLING **********************/
       // Handle button clicks
       // Add button click handlers for any custom controls
       document.getElementById("show-hospitals-button").addEventListener("click", async () => {
@@ -38,6 +39,10 @@
       document.getElementById("show-route-button").addEventListener("click", async () => {
         showRoute()
       })
+      document.getElementById("toggle-flight-data-button").addEventListener("click", () => {
+        toggleFlightData();
+      });
     </script>
   </body>
 </html>
+

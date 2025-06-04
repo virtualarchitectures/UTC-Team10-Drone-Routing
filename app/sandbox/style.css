@@ -19,7 +19,7 @@ body {
   top: 5px;
   left: 10px;
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* Number of buttons per row */
+  grid-template-columns: repeat(5, 1fr); /* Number of buttons per row */
   gap: 10px;
 }
 button {

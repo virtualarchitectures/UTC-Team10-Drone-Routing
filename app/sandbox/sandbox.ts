@@ -1,8 +1,10 @@
 import * as Cesium from "cesium"
 import { init3dGoogleViewer } from "../cesium-init"
 import { searchNearby } from "../api/placesapi"
+
 import flightData from "./formatted_routes/over_water.json"
-// import flightData from "./formatted_routes/over_water_direct.json"
+import flightDataDirect from "./formatted_routes/over_water_direct.json"
+
 import { computeRoutes, ComputeRoutesResponse } from "../api/routesapi"
 
 // *********** VIEWER **********************
@@ -144,6 +146,13 @@ export const toggleHospitals = () => {
 }
 
 // *********** FUNCTIONS FOR UI **********************
+let currentFlightData = flightData;
+
+export const toggleFlightData = () => {
+  currentFlightData = currentFlightData === flightData ? flightDataDirect : flightData;
+  console.log(`Switched to ${currentFlightData === flightData ? "over water" : "over water direct"} route`);
+}
+
 export const showRoute = async () => {
   /* Initialize the viewer clock:
   Assume the radar samples are 30 seconds apart, and calculate the entire flight duration based on that assumption.
@@ -171,8 +180,8 @@ export const showRoute = async () => {
   // The SampledPositionedProperty stores the position and timestamp for each sample along the radar sample series.
   const positionProperty = new Cesium.SampledPositionProperty()
 
-  for (let i = 0; i < flightData.length; i++) {
-    const dataPoint = flightData[i]
+  for (let i = 0; i < currentFlightData.length; i++) {
+    const dataPoint = currentFlightData[i];
     // Declare the time for this individual sample and store it in a new JulianDate instance.
     const time = Cesium.JulianDate.addSeconds(start, i * timeStepInSeconds, new Cesium.JulianDate())
     const position = Cesium.Cartesian3.fromDegrees(dataPoint.longitude, dataPoint.latitude, dataPoint.height + 30)
@@ -208,8 +217,9 @@ export const showRoute = async () => {
 
   viewer.trackedEntity = airplaneEntity
 
-  const origin = flightData[0]
-  const destination = flightData[flightData.length - 1]
+  const origin = currentFlightData[0];
+  const destination = currentFlightData[currentFlightData.length - 1];
+
 
   const distance = flightData.reduce((prev, curr, indx) => {
     if (indx === 0) {
@@ -250,9 +260,9 @@ export const showRoute = async () => {
       longitude: destination.longitude,
       latitude: destination.latitude
     }
-  )
+  );
 
-  showRoadRoute(roadRoute)
+  showRoadRoute(roadRoute);
 }
 
 export const showAirZones = () => {
