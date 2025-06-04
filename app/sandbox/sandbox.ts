@@ -9,6 +9,16 @@ import { computeRoutes, ComputeRoutesResponse } from "../api/routesapi"
 // Option of 2d or 3d tileset
 const { viewer } = await init3dGoogleViewer()
 
+// Set viewer start location
+viewer.camera.setView({
+  destination: Cesium.Cartesian3.fromDegrees(-6.2603, 53.3498, 1000000), // longitude, latitude, height in meters
+  orientation: {
+    heading: 0.0,
+    pitch: -Cesium.Math.PI_OVER_TWO, // Look straight down
+    roll: 0.0
+  }
+});
+
 const resource = await Cesium.IonResource.fromAssetId(3412943)
 const airZones = await Cesium.GeoJsonDataSource.load(resource, {
   clampToGround: true,
