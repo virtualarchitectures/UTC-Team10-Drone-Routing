@@ -166,7 +166,15 @@ export const switchFlightData = (type: string) => {
   showRoute();
 }
 
+// Track the route display status
+let isRouteDisplayed = false;
+
 export const showRoute = async () => {
+  if (isRouteDisplayed) {
+    clearFlightVisualization();
+    isRouteDisplayed = false;
+    return;
+  }
   /* Initialize the viewer clock:
   Assume the radar samples are 30 seconds apart, and calculate the entire flight duration based on that assumption.
   Get the start and stop date times of the flight, where the start is the known flight departure time (converted from PST 
@@ -233,7 +241,6 @@ export const showRoute = async () => {
   const origin = currentFlightData[0];
   const destination = currentFlightData[currentFlightData.length - 1];
 
-
   const distance = currentFlightData.reduce((prev, curr, indx) => {
     if (indx === 0) {
       // Skip the first iteration
@@ -276,6 +283,8 @@ export const showRoute = async () => {
   );
 
   showRoadRoute(roadRoute);
+
+  isRouteDisplayed = true;
 }
 
 export const showAirZones = () => {

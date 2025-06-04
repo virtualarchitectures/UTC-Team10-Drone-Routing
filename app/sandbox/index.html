@@ -32,7 +32,6 @@
       import { showRoute, showAirZones, toggleHospitals, switchFlightData } from "./sandbox"
       // *********** CONTROL HANDLING **********************/
       // Handle button clicks
-      // Add button click handlers for any custom controls
       document.getElementById("show-hospitals-button").addEventListener("click", async () => {
         toggleHospitals()
       })
@@ -40,7 +39,7 @@
         showAirZones()
       })
       document.getElementById("show-route-button").addEventListener("click", async () => {
-        showRoute()
+        showRoute();  // Toggle the route display state
       })
       // Added a new event listener for the select element
       document.getElementById("flight-data-select").addEventListener("change", (event) => {
@@ -54,4 +53,3 @@
     </script>
   </body>
 </html>
-
