@@ -322,7 +322,7 @@ function drawRoutes(routes: ComputeRoutesResponse["routes"]) {
       polyline: {
         positions: Cesium.Cartesian3.fromDegreesArray(coordinates),
         material: Cesium.Color.RED.withAlpha(0.6),
-        width: 5,
+        width: 8, // Set width of routes
         clampToGround: true
       }
     })
