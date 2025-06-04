@@ -149,9 +149,11 @@ export const toggleHospitals = () => {
 let currentFlightData = directFlightData;
 
 function clearFlightVisualization() {
-  viewer.entities.removeAll(); // Remove all entities including flight paths
+  viewer.entities.removeAll(); // Remove all entities including flight paths and pins
   viewer.dataSources.removeAll(); // Clear data sources if needed
-  // Reset other visual states or elements if necessary
+
+  // Reset any additional state variables if necessary
+  isRouteDisplayed = false;
 }
 
 export const switchFlightData = (type: string) => {
@@ -163,7 +165,7 @@ export const switchFlightData = (type: string) => {
   clearFlightVisualization();
 
   // Re-display the route with the new data
-  showRoute();
+  showRoute(); 
 }
 
 // Track the route display status
