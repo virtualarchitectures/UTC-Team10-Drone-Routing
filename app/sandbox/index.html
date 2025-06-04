@@ -16,24 +16,27 @@
       <!-- Basic Controls -->
       <button id="home-button" onclick="window.location.href='/index.html'"><i class="fas fa-home"></i> Home</button>
       <!-- Additional Controls - Add as needed -->
-      <button id="show-route-button">Show Route</button>
-      <button id="show-air-zone-button">Show Air Restrictions</button>
+      <button id="show-route-button">Drone Routes</button>
+      <button id="show-hospitals-button">Hospitals</button>
+      <button id="show-air-zone-button">UAS Air Restrictions</button>
     </div>
     <div class="route-panel">
         <div>Route: <b>Rotunda Hospital</b> to <b>St James's Hospital</b></div>
         <div id="distance-val"></div>
     </div>
     <script type="module">
-      import { showRoute, showAirZones } from "./sandbox"
+      import { showRoute, showAirZones, toggleHospitals } from "./sandbox"
       // *********** CONTROL HANDLING **********************
       // Handle button clicks
       // Add button click handlers for any custom controls
+      document.getElementById("show-hospitals-button").addEventListener("click", async () => {
+        toggleHospitals()
+      })
+      document.getElementById("show-air-zone-button").addEventListener("click", async () => {
+        showAirZones()
+      })
       document.getElementById("show-route-button").addEventListener("click", async () => {
         showRoute()
-      })
-
-            document.getElementById("show-air-zone-button").addEventListener("click", async () => {
-        showAirZones()
       })
     </script>
   </body>
